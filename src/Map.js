@@ -1,0 +1,3 @@
+var IMap = Interface({
+
+});
