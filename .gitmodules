@@ -1,0 +1,3 @@
+[submodule "deps/signature.js"]
+	path = deps/signature.js
+	url = http://github.com/amatiasq/signature.js.git
