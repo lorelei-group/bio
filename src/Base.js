@@ -1,14 +1,29 @@
+var IBase = Interface({
+
+	init: signature().returns('IBase'),
+
+	config: signature().returns('IBase')
+
+}).setName('IBase');
+
+
 (function() {
 
-	function wrap(child, base) {
-		return function() {
+	function addProperty(parent, value) {
+		if (signature.isSignature(parent))
+			return parent.wrap(value);
+
+		if (typeof value !== 'function' || typeof parent !== 'function')
+			return value;
+
+		return function wrapper() {
 			var original = this.base;
-			this.base = base;
-			var result = child.apply(this, arguments);
+			this.base = parent;
+			var result = value.apply(this, arguments);
 			this.base = original;
 			return result;
 		};
-	};
+	}
 
 	function extend(config) {
 		function intermediate() { }
@@ -16,20 +31,19 @@
 		var result = new intermediate();
 
 		config = config || {};
+		if (!this.extend && !config.extend)
+			config.extend = extend;
 
-		for (var i in config) {
-			if (config.hasOwnProperty(i)) {
-				if (typeof config[i] === 'function')
-					result[i] = wrap(this[i], config[i], i)
-				else
-					result[i] = config[i];
-			}
-		}
+		for (var i in config)
+			if (config.hasOwnProperty(i))
+				result[i] = addProperty(this[i], config[i]);
 
 		return result;
 	};
 
-	window.Base = extend.call(Object, {
+	window.Base = extend.call(Object.prototype, {
+		base: function() { },
+
 		init: function() {
 			return this;
 		},
@@ -37,15 +51,9 @@
 		config: function() {
 			return this;
 		}
-
-		base: function() { }
 	});
 
-})()
+	IBase(Base);
 
-var IBase = Interface({
+})();
 
-	init: signature().returns(IBase),
-
-	config: signature().returns(IBase)
-});
