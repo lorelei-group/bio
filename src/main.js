@@ -1,3 +1,3 @@
 window.onload = function() {
-	// start app
+	ArtificialLife.extend().init().start();
 };

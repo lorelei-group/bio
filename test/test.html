@@ -6,8 +6,25 @@
 		<script type="text/javascript" src="../deps/signature.js/src/signature.js"></script>
 		<script type="text/javascript" src="../deps/signature.js/src/interface.js"></script>
 
-		<script type="text/javascript" src="../src/Base.js"></script>
-		<script type="text/javascript" src="../src/IElement.js"></script>
+		<!--
+		<script type="text/javascript" src="../deps/signature.js/src/disabled.js"></script>
+		-->
+
+		<script>var start = new Date()</script>
+
+		<script type="text/javascript" src="../src/core/Integer.js"></script>
+		<script type="text/javascript" src="../src/core/Base.js"></script>
+		<script type="text/javascript" src="../src/core/Emitter.js"></script>
+		<script type="text/javascript" src="../src/core/Promise.js"></script>
+		<script type="text/javascript" src="../src/core/Timer.js"></script>
+
+		<script type="text/javascript" src="../src/physics/Vector.js"></script>
+
+		<script>console.log("Init: " + (new Date() - start));</script>
+
+		<script type="text/javascript" src="../src/Map.js"></script>
+		<script type="text/javascript" src="../src/ArtificialLife.js"></script>
+		<script type="text/javascript" src="../src/main.js"></script>
 	</head>
 	<body />
 </html>

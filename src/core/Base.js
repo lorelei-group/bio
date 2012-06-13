@@ -1,18 +1,14 @@
 var IBase = Interface({
-
-	init: signature().returns('IBase'),
-
-	config: signature().returns('IBase')
-
+	init: signature().chain(),
+	is: signature(Object).returns(Boolean)
 }).setName('IBase');
 
 
 (function() {
 
-	function addProperty(parent, value) {
-		if (signature.isSignature(parent))
-			return parent.wrap(value);
+	function intermediate() { }
 
+	function addProperty(parent, value) {
 		if (typeof value !== 'function' || typeof parent !== 'function')
 			return value;
 
@@ -26,7 +22,6 @@ var IBase = Interface({
 	}
 
 	function extend(config) {
-		function intermediate() { }
 		intermediate.prototype = this;
 		var result = new intermediate();
 
@@ -41,19 +36,25 @@ var IBase = Interface({
 		return result;
 	};
 
-	window.Base = extend.call(Object.prototype, {
+	window.Base = IBase(extend.call(Object.prototype, {
 		base: function() { },
 
 		init: function() {
 			return this;
 		},
 
-		config: function() {
-			return this;
-		}
-	});
+		is: function(parent) {
+			if (typeof parent === 'function') {
+				if (parent.isImplementedBy)
+					return parent.isImplementedBy(this);
+				else
+					return this instanceof parent;
+			}
 
-	IBase(Base);
+			intermediate.prototype = parent;
+			return this instanceof intermediate;
+		}
+	}));
 
 })();
 
