@@ -1,60 +1,34 @@
-var IBase = Interface({
-	init: signature().chain(),
-	is: signature(Object).returns(Boolean)
-}).setName('IBase');
+// #COMMIT Removed interfaces at 0c58bee4be0a92ecb12feae9588ccee56ce19104
 
+(function(global) {
 
-(function() {
+	function proto(config) {
+		config || (config = {});
+		config.__proto__ = this;
 
-	function intermediate() { }
+		if (!config.proto)
+			config.proto = proto;
 
-	function addProperty(parent, value) {
-		if (typeof value !== 'function' || typeof parent !== 'function')
-			return value;
-
-		return function wrapper() {
-			var original = this.base;
-			this.base = parent;
-			var result = value.apply(this, arguments);
-			this.base = original;
-			return result;
-		};
+		return config;
 	}
 
-	function extend(config) {
-		intermediate.prototype = this;
-		var result = new intermediate();
+	function chain() {
+		return this;
+	}
 
-		config = config || {};
-		if (!this.extend && !config.extend)
-			config.extend = extend;
-
-		for (var i in config)
-			if (config.hasOwnProperty(i))
-				result[i] = addProperty(this[i], config[i]);
-
-		return result;
+	global.Base = {
+		proto: proto,
+		init: chain
 	};
 
-	window.Base = IBase(extend.call(Object.prototype, {
-		base: function() { },
+})(this);
 
-		init: function() {
-			return this;
-		},
-
-		is: function(parent) {
-			if (typeof parent === 'function') {
-				if (parent.isImplementedBy)
-					return parent.isImplementedBy(this);
-				else
-					return this instanceof parent;
-			}
-
-			intermediate.prototype = parent;
-			return this instanceof intermediate;
-		}
-	}));
-
-})();
-
+function wrap(base, funct) {
+	return function() {
+		var original = this.base;
+		this.base = base;
+		var result = funct.apply(this, arguments);
+		this.base = original;
+		return result;
+	};
+}

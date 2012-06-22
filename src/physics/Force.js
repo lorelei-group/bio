@@ -28,7 +28,7 @@ var Force = IForce(Base.extend({
 
 
 	init: function() {
-		this.direction = Vector.extend({ x: 0, y: 0 }).init();
+		this.direction = Vector.extend().init(0, 0);
 
 	}
 }))

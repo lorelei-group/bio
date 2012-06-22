@@ -1,39 +1,20 @@
-var IVector = Interface({
-	// Base
-	equals: signature('IVector').returns(Boolean),
-	clone: signature().returns('IVector'),
-	isZero: signature().returns(Boolean),
-
-	// Operator
-	round: signature().chain(),
-	abs: signature().chain(),
-	multiply: signature(Number).chain(),
-	merge: signature('IVector').chain(),
-	diff: signature('IVector').returns('IVector'),
-
-	// Math
-	getHypotenuse: signature().returns(Number),
-	getAngle: signature().returns(Number),
-	setAngle: signature(Number).returns(null),
-	getRadians: signature().returns(Number),
-	setRadians: signature(Number).returns(null)
-});
-
-var Vector = IVector(Base.extend({
-	x: 0,
-	y: 0,
-
-
+var Vector = Base.proto({
 	//
 	// Base methods
 	//
+
+	init: function(x, y) {
+		this.x = x || 0;
+		this.y = y || 0;
+		return this;
+	},
 
 	equals: function(target) {
 		return this.x === target.x && this.y === target.y;
 	},
 
 	clone: function() {
-		return this.extend({ x: this.x, y: this.y });
+		return this.proto().init(this.x, this.y);
 	},
 
 	isZero: function() {
@@ -84,10 +65,7 @@ var Vector = IVector(Base.extend({
 	},
 
 	diff: function(vector) {
-		return this.extend({
-			x: this.x - vector.x,
-			y: this.y - vector.y
-		});
+		return this.extend().init(this.x - vector.x, this.y - vector.y);
 	},
 
 
@@ -141,5 +119,29 @@ var Vector = IVector(Base.extend({
 
 	toString: function() {
 		return "[object Vector] { x: " + this.x + ", y: " + this.y + " }";
+	},
+
+	dispose: function() {
+		this.x = null;
+		this.y = null;
+		Vector.pool.dispose(this);
 	}
 }));
+
+Vector.pool = {
+	_pool: [],
+
+	get: function(x, y) {
+		var pool = this._pool;
+		if (pool.length === 0)
+			return Vector.extend().init(x, y);
+
+		var vec = poop.pop();
+		vec.init(x, y);
+		return vec;
+	},
+
+	dispose: function(vector) {
+		this._pool.push(vector);
+	}
+};

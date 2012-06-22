@@ -1,35 +1,26 @@
-var DEventHandler = signature(String, Function).returns(null);
-
-var IEventable = Interface({
-	on: DEventHandler,
-	off: DEventHandler,
-	once: DEventHandler
-}).setName('IEventable');
-
 (function() {
 
-	var IEmitter = Interface(IEventable, {
-		emit: signature(String, '...').returns(null)
-	}).setName('IEmitter');
+	var FakeArray = { proto: function() { return []; } };
+	var ArrayPool = Pool.proto().init(FakeArray);
 
-	var Emitter = IEmitter(Base.extend({
+	var Emitter = Base.extend({
 
 		init: function() {
-			this._listeners = {};
-			return this.base();
+			this.listeners = {};
+			return this;
 		},
 
 		on: function(signal, handler) {
-			if (!this._listeners[signal])
-				this._listeners[signal] = [];
-			this._listeners[signal].push(handler);
+			if (!this.listeners[signal])
+				this.listeners[signal] = [];
+			this.listeners[signal].push(handler);
 		},
 
 		off: function(signal, handler) {
-			if (!this._listeners[signal])
+			if (!this.listeners[signal])
 				return;
 
-			var list = this._listeners[signal];
+			var list = this.listeners[signal];
 				index = list.indexOf(handler);
 
 			if (index !== -1)
@@ -45,18 +36,17 @@ var IEventable = Interface({
 		},
 
 		emit: function(signal, var_args) {
-			if (!this._listeners[signal])
+			if (!this.listeners[signal])
 				return;
 
-			var list = this._listeners[signal],
+			var list = this.listeners[signal],
 				args = arguments.length > 1 ?
 					Array.prototype.slice.call(arguments, 1) : [];
 
 			for (var i = 0, len = list.length; i < len; i++)
 				list[i].apply(null, args);
 		}
-
-	}));
+	});
 
 	var delegateToEmitter = function(signal, handler) {
 		this.emitter.on(signal, handler);
