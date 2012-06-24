@@ -1,46 +1,49 @@
-var IPromise = Interface({
-	init: signature().chain(),
-	then: signature(Function, opt(Function), opt(Function)).chain(),
-	complete: signature('...'),
-	fail: signature(Object /* error */)
-}).setName('IPromise');
+(function(global) {
 
-var ICancellablePromise = Interface(IPromise, {
-	cancel: signature().returns(Boolean)
-}).setName('ICancellablePromise');
+	var state = Name.create(),
+		onDone = Name.create(),
+		onError = Name.create();
 
+	var States = {
+		open: 1,
+		done: 2,
+		failed: 3
+	};
 
-var Promise = IPromise(Base.extend({
-	init: function() {
-		this._onDone = [];
-		this._onError = [];
-		this._onProgress = [];
-		return this.base();
-	},
+	global.Promise = Base.proto({
 
-	then: function(onDone, onError, onProgress) {
-		if (typeof onDone === 'function')
-			this._onDone.push(onDone);
+		init: function() {
+			this[state] = States.open;
+			this[onDone] = Pool.Array.get();
+			this[onError] = Pool.Array.get();
+			return Base.init.call(this);
+		},
 
-		if (typeof onError === 'function')
-			this._onError.push(onError);
+		then: function(onDone, onError, onProgress) {
+			if (typeof onDone === 'function')
+				this[onDone].push(onDone);
 
-		return this;
-	},
+			if (typeof onError === 'function')
+				this[onError].push(onError);
 
-	complete: function(var_args) {
-		for (var i = 0, len = this._onDone.length; i < len; i++)
-			this._onDone[i].apply(null, arguments);
-	},
+			return this;
+		},
 
-	fail: function(error) {
-		for (var i = 0, len = this._onError.length; i < len; i++)
-			this._onError[i].call(null, error);
-	}
-}));
+		complete: function(var_args) {
+			for (var i = 0, len = this[onDone].length; i < len; i++)
+				this[onDone][i].apply(null, arguments);
+		},
 
-Promise.Cancellable = ICancellablePromise(Promise.extend({
-	cancel: function() {
-		return false;
-	}
-}));
+		fail: function(error) {
+			for (var i = 0, len = this[onError].length; i < len; i++)
+				this[onError][i].call(null, error);
+		}
+	});
+
+	Promise.Cancellable = Promise.proto({
+		cancel: function() {
+			return false;
+		}
+	});
+
+})(this);

@@ -1,28 +1,30 @@
-var ITimer = Interface({
-	once: signature(Integer).returns(ICancellablePromise),
-	start: signature().chain(),
-	stop: signature().chain(),
-	tick: signature().returns(null)
-}).setName('ITimer');
-
-var Timer = Base.extend({
+var Timer = Base.proto({
 	interval: 1000,
 	id: null,
 
-	init: function() {
+	init: function(interval) {
+		this.interval = interval || this.interval;
 		this.tick = this.tick.bind(this);
-		return this.base();
+		return Base.init.call(this);
+	},
+
+	dispose: function() {
+		if (this.id)
+			this.stop();
+		Base.dispose.call(this);
 	},
 
 	once: function() {
-		var prom = Promise.Cancellable.extend().init();
+		var prom = Promise.Cancellable.proto({
+			cancel: function() {
+				clearTimeout(id);
+			}
+		}).init();
+
 		var id = setTimeout(function() {
 			prom.complete();
+			prom.dispose();
 		}, this.interval);
-
-		prom.cancel = function() {
-			clearTimeout(id);
-		};
 
 		return prom;
 	},

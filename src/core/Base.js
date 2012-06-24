@@ -2,27 +2,52 @@
 
 (function(global) {
 
-	function proto(config) {
-		config || (config = {});
-		config.__proto__ = this;
-
-		if (!config.proto)
-			config.proto = proto;
-
-		return config;
-	}
-
-	function chain() {
-		return this;
-	}
+	var uniqueId = 1;
 
 	global.Base = {
-		proto: proto,
-		init: chain
+
+		initialized: false,
+		disposed: false,
+
+		proto: function(config) {
+			if (!config) {
+				config = Pool.Object.get();
+				delete config.dispose;
+			}
+
+			config.__proto__ = this;
+
+			if (!config.proto)
+				config.proto = proto;
+
+			return config;
+		},
+
+		init: function() {
+			this.initialized = true;
+			return this;
+		},
+
+		dispose: function() {
+			// Totally non-sense, Pool.Object.dispose removes every property
+			this.disposed = true;
+			Pool.Object.dispose(this);
+		},
+
+		hash: function() {
+			var hash = uniqueId++;
+			this.hash = function() { return hash; };
+			return hash;
+		},
+
+		getPrototype: function() {
+			return Object.getPrototypeOf(this);
+		}
 	};
 
 })(this);
 
+/*
 function wrap(base, funct) {
 	return function() {
 		var original = this.base;
@@ -32,3 +57,4 @@ function wrap(base, funct) {
 		return result;
 	};
 }
+*/

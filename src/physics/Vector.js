@@ -6,7 +6,7 @@ var Vector = Base.proto({
 	init: function(x, y) {
 		this.x = x || 0;
 		this.y = y || 0;
-		return this;
+		return Base.init.call(this);
 	},
 
 	equals: function(target) {
@@ -14,7 +14,7 @@ var Vector = Base.proto({
 	},
 
 	clone: function() {
-		return this.proto().init(this.x, this.y);
+		return Vector.proto().init(this.x, this.y);
 	},
 
 	isZero: function() {
@@ -65,13 +65,14 @@ var Vector = Base.proto({
 	},
 
 	diff: function(vector) {
-		return this.extend().init(this.x - vector.x, this.y - vector.y);
+		return Veector.proto().init(this.x - vector.x, this.y - vector.y);
 	},
 
 
 	//
 	// Math methods
 	//
+
 	getHypotenuse: function() {
 		if (this.isZero())
 			return 0;
@@ -119,29 +120,5 @@ var Vector = Base.proto({
 
 	toString: function() {
 		return "[object Vector] { x: " + this.x + ", y: " + this.y + " }";
-	},
-
-	dispose: function() {
-		this.x = null;
-		this.y = null;
-		Vector.pool.dispose(this);
 	}
-}));
-
-Vector.pool = {
-	_pool: [],
-
-	get: function(x, y) {
-		var pool = this._pool;
-		if (pool.length === 0)
-			return Vector.extend().init(x, y);
-
-		var vec = poop.pop();
-		vec.init(x, y);
-		return vec;
-	},
-
-	dispose: function(vector) {
-		this._pool.push(vector);
-	}
-};
+});

@@ -1,52 +1,17 @@
 (function(global) {
 
-	var Pool = global.Pool = Base.proto({
+	var Pool = Base.proto({
 		pool: [],
 		prototype: null,
 
 		init: function(prototype) {
-			var self = this;
-			prototype.pool = this;
 			this.prototype = prototype;
-
-			prototype.dispose = function() {
-				self.dispose(this);
-			};
+			prototype.pool = this;
+			prototype.dispose = this._getDisposeMethod();
 		},
 
 		get: function() {
-			if (this.pool.length)
-				return this.pool.pop();
-			return this.prototype.proto();
-		},
-
-		dispose: function(obj) {
-			this.pool.push(obj);
-		}
-	});
-
-	var NativePool = Base.proto({
-		pool: [],
-		prototype: null,
-
-		init: function(creator) {
-			var self = this;
-
-			function disposable() {
-				self.dispose(this);
-			}
-
-			this.creator = function() {
-				var instance = creator();
-				instance.dispose = disposable;
-				return instance;
-			};
-
-			return this;
-		},
-
-		get: function() {
-			this.clean(this.retrieve());
+			return this.clean(this._retrieve());
 		},
 
 		dispose: function(obj) {
@@ -57,21 +22,80 @@
 			return obj;
 		},
 
-		retrieve: function() {
+		_retrieve: function() {
 			if (this.pool.length)
 				return this.pool.pop();
-			return this.creator();
+			return this._create();
+		},
+
+		_create: function() {
+			return this.prototype.proto();
+		},
+
+		_getDisposeMethod: function() {
+			var self = this;
+			return function() {
+				self.dispose(this);
+			};
 		}
 	});
 
-	Pool.Array = NativePool.proto().init(function() { return [] });
-	Pool.Object = NativePool.proto().init(function() { return {} });
+	var NativePool = Pool.proto({
 
-	var hasOwn = Object.prototype.hasOwnProperty();
-	Pool.Object.get = wrap(Pool.Object.get, function(obj) {
-		var temp = this.base();
-		for (var i in temp)
-			if (temp.hasOwn)
+		init: function(creator) {
+			var disposable = this._getDisposeMethod();
+
+			this._create = function() {
+				var instance = creator();
+				instance.dispose = disposable;
+				return instance;
+			};
+
+			return this;
+		},
+
+		get: function() {
+			return this._retrieve();
+		},
+
+		dispose: function(obj) {
+			this.clean(obj);
+			Pool.dispose.call(this, obj);
+		}
 	});
+
+
+	Pool.Array = NativePool.proto({
+
+		clean: function(array) {
+			for (var i = 0, len = array.length; i < len; i++)
+				if (array[i].dispose)
+					array[i].dispose();
+			array.length = 0;
+			return array;
+		}
+
+	}).init(function() { return [] });
+
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+	Pool.Object = NativePool.proto({
+
+		clean: function(obj) {
+			for (var i in obj) {
+				if (hasOwn.call(obj, i)) {
+					if (obj[i].dispose)
+						obj[i].dispose();
+					obj[i] = null;
+					delete obj[i];
+				}
+			}
+			return obj;
+		}
+
+	}).init(function() { return {} });
+
+
+	global.Pool = Pool;
 
 })(this);

@@ -1,18 +1,15 @@
-(function() {
+(function(global) {
 
-	var FakeArray = { proto: function() { return []; } };
-	var ArrayPool = Pool.proto().init(FakeArray);
-
-	var Emitter = Base.extend({
+	var Emitter = Base.proto({
 
 		init: function() {
-			this.listeners = {};
+			this.listeners = Pool.Object.get();
 			return this;
 		},
 
 		on: function(signal, handler) {
 			if (!this.listeners[signal])
-				this.listeners[signal] = [];
+				this.listeners[signal] = Pool.Array.get();
 			this.listeners[signal].push(handler);
 		},
 
@@ -24,7 +21,7 @@
 				index = list.indexOf(handler);
 
 			if (index !== -1)
-				list.splice(index, 1);
+				Array.remove(list, index);
 		},
 
 		once: function(signal, handler) {
@@ -41,26 +38,31 @@
 
 			var list = this.listeners[signal],
 				args = arguments.length > 1 ?
-					Array.prototype.slice.call(arguments, 1) : [];
+					Array.fromArgs(arguments, 1) : null;
 
 			for (var i = 0, len = list.length; i < len; i++)
 				list[i].apply(null, args);
 		}
 	});
 
-	var delegateToEmitter = function(signal, handler) {
-		this.emitter.on(signal, handler);
-	};
-
-	Base = IEventable(Base.extend({
+	var parent = Base;
+	global.Base = Base.proto({
 		init: function() {
-			this.emitter = Emitter.extend().init();
-			return this;
+			this.emitter = Emitter.proto().init();
+			return parent.init.call(this);
 		},
 
-		on: delegateToEmitter,
-		off: delegateToEmitter,
-		once: delegateToEmitter
-	}));
+		on: function(signal, handler) {
+			this.emitter.on(signal, handler);
+		},
 
-})();
+		off: function(signal, handler) {
+			this.emitter.off(signal, handler);
+		},
+
+		once: function(signal, handler) {
+			this.emitter.once(signal, handler);
+		}
+	});
+
+})(this);

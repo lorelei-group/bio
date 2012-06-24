@@ -1,34 +1,77 @@
-var IForce = Interface({
-	// Direction
-	getDirection: signature().returns(Number),
-	setDirection: signature(Number).returns(),
-	modifyDirection: signature(Number).returns(Number),
+var Force = Base.proto({
 
-	// Direction in radians
-	getRadians: signature().returns(Number),
-	setRadians: signature(Number).returns(),
-
-	// Strength
-	getStrength: signature().returns(Number),
-	setStrength: signature(Number).returns(),
-	modifyStrength: signature(Number).returns(Number),
-
-	// Vector
-	getVector: signature().returns(IVector),
-
-	// Operators
-	equals: signature('IForce').returns(Boolean),
-	clone: signature().returns('IForce'),
-	merge: signature('IForce').chain()
-});
-
-var Force = IForce(Base.extend({
-	direction: null,
-	strength: 0,
+	init: function(degrees, strength) {
+		this.direction = Vector.proto().init(0, 0);
+		this.strength = 0;
+		return Base.init.call(this);
+	},
 
 
-	init: function() {
-		this.direction = Vector.extend().init(0, 0);
+	getDirection: function() {
+		return this.direction.getAngle();
+	},
+	setDirection: function(value) {
+		this.direction.setAngle(value);
+	},
+	modifyDirection: function(addition) {
+		this.direction.setAngle(this.direction.getAngle() + addition);
+	},
 
+	getRadians: function() {
+		return this.direction.getRadians();
+	},
+	setRadians: function(value) {
+		this.direction.setRadians(value);
+	},
+
+
+	getStrength: function() {
+		return this.strength;
+	},
+	setStrength: function(val) {
+		this.strength = val;
+		this._fixStrength();
+		return this;
+	},
+	modifyStrength: function(addition) {
+		this.setStrength(this.getStrength() + addition);
+		return this;
+	},
+	_fixStrength: function() {
+		if (this.strength < 0) {
+			this.direction.multiply(-1);
+			this.strength *= -1;
+		}
+	},
+
+	getVector: function() {
+		return this.direction.clone().multiply(this.strength);
+	},
+
+	equals: function(target) {
+		return this.getRadians() === target.getRadians() &&
+			this.getStrength() === target.getStrength();
+	},
+
+	clone: function() {
+		return Force.proto().init(this.getDirection(), this.getStrength());
+	},
+
+	merge: function(force) {
+		var flow = this.getVector(),
+			force = force.getVector();
+		flow.merge(force);
+
+		this.setDirectionRadians(flow.getAngleRadians());
+		this.setStrength(flow.getHypotenuse());
+
+		flow.dispose();
+		force.dispose();
+		return this;
+	},
+
+	toString: function() {
+		return "[object Force] { direction: " + this.getDirection() +
+			", strength: " + this.strength + "}";
 	}
-}))
+});
