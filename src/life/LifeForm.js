@@ -1,11 +1,10 @@
 var LifeForm = Physics.proto({
-	type: 'LifeForm',
 
+	type: 'LifeForm',
 	parents: null,
 
 	init: function(x, y, diameter) {
 		this.alive = true;
-		this.isParent = this.isParent.bind(this);
 		return Physics.init.call(this, x, y, diameter);
 	},
 
@@ -29,20 +28,14 @@ var LifeForm = Physics.proto({
 		return false;
 	},
 
-	setParents: function(var_args) {
-		var parents = Array.fromArgs(arguments);
-		parents.forEach(this._removeParentWhenDead);
+	_getHash: funct('hash'),
 
+	setParents: function(var_args) {
+		var parents = Array.fromArgs(arguments).map(this._getHash);
 		this.parents = parents;
 		this.isParent = function(target) {
-			return parents && parents.indexOf(target) !== -1;
+			return parents && parents.indexOf(target.hash()) !== -1;
 		};
-	},
-
-	_removeParentWhenDead: function(parent, index, array) {
-		parent.once('die', function() {
-			Array.remove(array, index);
-		})
 	},
 
 	isFamily: function(target) {

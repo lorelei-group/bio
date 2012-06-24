@@ -3,13 +3,13 @@
 	var Emitter = Base.proto({
 
 		init: function() {
-			this.listeners = Pool.Object.get();
+			this.listeners = {};
 			return this;
 		},
 
 		on: function(signal, handler) {
 			if (!this.listeners[signal])
-				this.listeners[signal] = Pool.Array.get();
+				this.listeners[signal] = [];
 			this.listeners[signal].push(handler);
 		},
 
@@ -47,6 +47,9 @@
 
 	var parent = Base;
 	global.Base = Base.proto({
+
+		type: 'Emitter',
+
 		init: function() {
 			this.emitter = Emitter.proto().init();
 			return parent.init.call(this);

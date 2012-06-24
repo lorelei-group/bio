@@ -1,8 +1,10 @@
 var Set = Base.proto({
 
+	type: 'Set',
+
 	init: function() {
-		this.byHash = Pool.Object.get();
-		this.items = Pool.Array.get();
+		this.byHash = {};
+		this.items = [];
 		return Base.init.call(this);
 	},
 
@@ -19,8 +21,7 @@ var Set = Base.proto({
 	},
 
 	has: function(element) {
-		var hash = element.hash();
-		return typeof this.byHash[hash] === 'number';
+		return typeof this.byHash[element.hash()] === 'number';
 	},
 
 	add: function(element) {
@@ -43,5 +44,10 @@ var Set = Base.proto({
 
 		Array.remove(this.items, index);
 		return this;
+	},
+
+	merge: function(array) {
+		for (var i = array.length; i--; )
+			this.add(array[i]);
 	}
 });

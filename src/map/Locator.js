@@ -1,15 +1,17 @@
 var Locator = Base.proto({
 
+	type: 'Locator',
+
 	init: function(width, height) {
-		this.locations = Pool.Object.get();
+		this.locations = {};
 		this.setSize(width, height);
+		this.remove = this.remove.bind(this);
 		return Base.init.call(this);
 	},
 
 
 	tick: function() {
-		this.distanceCache.dispose()
-		this.distanceCache = Pool.Object.get();
+		this.distanceCache = {};
 	},
 
 	setSize: function(width, height) {
@@ -21,8 +23,9 @@ var Locator = Base.proto({
 	},
 
 	add: function(element, grid) {
-		this.locations[element.hash()] = Pool.Array.get();
+		this.locations[element.hash()] = [];
 		this.updateLocation(element, grid);
+		element.once('destroy', this.remove);
 	},
 
 	remove: function(element) {
@@ -30,9 +33,6 @@ var Locator = Base.proto({
 
 		for (var i=lastLocations.length; i--; )
 			lastLocations[i].remove(element);
-
-		lastLocations.length = 0;
-		lastLocations.dispose();
 	},
 
 	getCellsAtElement: function(grid, element) {
@@ -57,7 +57,7 @@ var Locator = Base.proto({
 		this._roundMap(element);
 
 		var id = element.hash(),
-			currentCells = grid.getCellsAtElement(element),
+			currentCells = this.getCellsAtElement(grid, element),
 			lastCells = this.locations[id],
 
 
@@ -110,7 +110,6 @@ var Locator = Base.proto({
 		this.distanceCache[id1 + '-' + id2] = distance;
 		this.distanceCache[id2 + '-' + id1] = distance;
 
-		location.dispose();
 		return distance;
 	},
 

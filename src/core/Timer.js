@@ -1,4 +1,6 @@
 var Timer = Base.proto({
+
+	type: 'Timer',
 	interval: 1000,
 	id: null,
 
@@ -6,12 +8,6 @@ var Timer = Base.proto({
 		this.interval = interval || this.interval;
 		this.tick = this.tick.bind(this);
 		return Base.init.call(this);
-	},
-
-	dispose: function() {
-		if (this.id)
-			this.stop();
-		Base.dispose.call(this);
 	},
 
 	once: function() {
@@ -23,7 +19,6 @@ var Timer = Base.proto({
 
 		var id = setTimeout(function() {
 			prom.complete();
-			prom.dispose();
 		}, this.interval);
 
 		return prom;
@@ -45,4 +40,53 @@ var Timer = Base.proto({
 	}
 });
 
+(function() {
 
+	var requestAnimFrame =
+		window.requestAnimationFrame       ||
+		window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame    ||
+		window.oRequestAnimationFrame      ||
+		window.msRequestAnimationFrame     ||
+		function(callback){
+			return window.setTimeout(callback, 1000 / 60);
+		};
+
+	var cancelAnimFrame =
+		window.cancelAnimationFrame       ||
+		window.webkitCancelAnimationFrame ||
+		window.mozCancelAnimationFrame    ||
+		window.oCancelAnimationFrame      ||
+		window.msCancelAnimationFrame     ||
+		function(id){
+			window.clearTimeout(id);
+		};
+
+
+	window.AnimationTimer = Base.proto({
+
+		type: 'AnimationTimer',
+		id: null,
+
+		init: function() {
+			this.tick = this.tick.bind(this);
+			return Base.init.call(this);
+		},
+
+		start: function() {
+			this.tick();
+		},
+
+		stop: function() {
+			cancelAnimFrame(this.id);
+			this.id = null;
+			return this;
+		},
+
+		tick: function() {
+			this.id = requestAnimFrame(this.tick);
+			this.emitter.emit('tick');
+		}
+	});
+
+})(this)

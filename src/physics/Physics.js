@@ -1,9 +1,15 @@
 var Physics = Element.proto({
+
 	type: 'Physics',
 
 	init: function(x, y, diameter) {
 		this.movement = Force.proto().init(0, 0);
+		this.weight = 0;
 		return Element.init.call(this, x, y, diameter);
+	},
+
+	tick: function() {
+		this.move();
 	},
 
 
@@ -27,17 +33,8 @@ var Physics = Element.proto({
 		this.movement.modifyStrength(addition);
 	},
 
-	getNextPosition: function() {
-		var vector = this.movement.getVector(),
-			result = this.location.clone().merge(vector);
-		vector.dispose();
-		return result;
-	},
-
 	_move: function() {
-		var vector = this.movement.getVector();
-		this.location.merge(vector);
-		vector.dispose();
+		this.location.merge(this.movement.getVector());
 	},
 	move: function() {
 		this._move();
@@ -50,9 +47,7 @@ var Physics = Element.proto({
 			return;
 		}
 
-		var force = Force.proto().init(degrees, strength * (1 - this.weight));
-		this.movement.merge(force);
-		force.dispose();
+		this.movement.merge(Force.proto().init(degrees, strength * (1 - this.weight)));
 	},
 
 	accelerate: function(force) {

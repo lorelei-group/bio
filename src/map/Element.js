@@ -1,13 +1,13 @@
 var Element = Base.proto({
-	type: 'Element',
 
-	destroyed: false,
+	type: 'Element',
 
 	init: function(x, y, diameter) {
 		this.location = Vector.proto().init(x || 0, y || 0);
 		this.diameter = diameter || 1;
 		return Base.init.call(this);
 	},
+
 
 	getX: function() { return this.location.x; },
 	setX: function(value) { this.location.x = value; },
@@ -36,6 +36,10 @@ var Element = Base.proto({
 		this.location.y = y;
 	},
 
+	getArea: function() {
+		return Math.PI * Math.pow(this.diameter / 2, 2);
+	},
+
 	testCollision: function(target) {
 		return (
 			this.distance(target) < target.diameter + this.diameter
@@ -52,25 +56,17 @@ var Element = Base.proto({
 		if (target.location)
 			target = target.location;
 
-		var diff = this.location.diff(target),
-			result = diff.getHypotenuse();
-
-		diff.dispose();
-		return result;
+		return this.location.diff(target).getHypotenuse();
 	},
 
 	angle: function(target) {
 		if (target.location)
 			target = target.location;
 
-		var diff = this.location.diff(target),
-			result = diff.getAngle();
-
-		diff.dispose();
-		return result;
+		return this.location.diff(target).getAngle();
 	},
 
 	destroy: function() {
-		this.destroyed = true;
+		this.emitter.emit('destroyed', this);
 	}
 });

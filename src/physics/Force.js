@@ -2,7 +2,11 @@ var Force = Base.proto({
 
 	init: function(degrees, strength) {
 		this.direction = Vector.proto().init(0, 0);
-		this.strength = 0;
+		this.strength = strength || 0;
+
+		if (degrees)
+			this.direction.setAngle(degrees);
+
 		return Base.init.call(this);
 	},
 
@@ -62,16 +66,14 @@ var Force = Base.proto({
 			force = force.getVector();
 		flow.merge(force);
 
-		this.setDirectionRadians(flow.getAngleRadians());
+		this.setRadians(flow.getRadians());
 		this.setStrength(flow.getHypotenuse());
 
-		flow.dispose();
-		force.dispose();
 		return this;
 	},
 
 	toString: function() {
-		return "[object Force] { direction: " + this.getDirection() +
-			", strength: " + this.strength + "}";
+		return "[object Force] { direction: "; /*+ this.getDirection() +
+			", strength: " + this.strength + "}";*/
 	}
 });

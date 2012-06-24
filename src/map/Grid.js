@@ -1,4 +1,6 @@
 var Grid = Base.proto({
+
+	type: 'Grid',
 	columns: 10,
 	rows: 10,
 	cellSize: 10,
@@ -20,14 +22,10 @@ var Grid = Base.proto({
 
 	reset: function() {
 		var row, j;
-
-		if (this.cells)
-			this.cells.dispose();
-
-		this.cells = Pool.Array.get();
+		this.cells = [];
 
 		for (var i = this.rows; i--; ) {
-			row = Pool.Array.get();
+			row = [];
 
 			for (j = this.columns; j--; )
 				row[j] = Set.proto().init();
@@ -52,7 +50,7 @@ var Grid = Base.proto({
 	},
 
 	_calcRange: function(start, end, size, max) {
-		var result = Pool.Object.get();
+		var result = {};
 
 		if (end - start > size) {
 
@@ -79,32 +77,31 @@ var Grid = Base.proto({
 	getCellsAtZone: function(startX, startY, endX, endY) {
 		var x = this._calcRange(startX, endX, this.width, this.columns),
 			y = this._calcRange(startY, endY, this.height, this.rows),
-			result = Pool.Array.get(),
+			result = [],
 
 			cols = this.columns,
 			rows = this.rows,
 			cells = this.cells,
-			i, end, j, jend;
+			i, end, j, jend, cell;
 
-		for (i = x.start, end = x.end; i < end; i++)
-			for (j = y.start, jend = y.end; j < jend; j++)
-				result[result.length] = cells[i % cols][j % rows];
+		for (i = x.start, end = x.end; i < end; i++) {
+			for (j = y.start, jend = y.end; j < jend; j++) {
+				cell = cells[i % cols][j % rows]
 
-		x.dispose();
-		y.dispose();
+				if (cell.length())
+					result[result.length] = cell;
+			}
+		}
 
 		return result;
 	},
 
 	getRangeFromZone: function(startX, startY, endX, endY) {
 		var cells = this.getCellsAtZone(startX, startY, endX, endY);
-		var result = Range.proto().init();
+		var result = Set.proto().init();
 
 		for (var i = cells.length; i--; )
 			result.merge(cells[i].getAll());
-
-		cells.length = 0;
-		cells.dispose();
 
 		return result;
 	}

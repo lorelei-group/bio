@@ -1,4 +1,7 @@
 var Vector = Base.proto({
+
+	type: 'Vector',
+
 	//
 	// Base methods
 	//

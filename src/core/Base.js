@@ -6,17 +6,14 @@
 
 	global.Base = {
 
+		type: 'Base',
 		initialized: false,
-		disposed: false,
 
 		proto: function(config) {
-			if (!config) {
-				config = Pool.Object.get();
-				delete config.dispose;
-			}
-
+			config || (config = {})
 			config.__proto__ = this;
 
+			// If 'this' is not Base we inject proto method
 			if (!config.proto)
 				config.proto = proto;
 
@@ -28,12 +25,6 @@
 			return this;
 		},
 
-		dispose: function() {
-			// Totally non-sense, Pool.Object.dispose removes every property
-			this.disposed = true;
-			Pool.Object.dispose(this);
-		},
-
 		hash: function() {
 			var hash = uniqueId++;
 			this.hash = function() { return hash; };
@@ -42,6 +33,10 @@
 
 		getPrototype: function() {
 			return Object.getPrototypeOf(this);
+		},
+
+		toString: function() {
+			return '[object ' + this.type +']';
 		}
 	};
 

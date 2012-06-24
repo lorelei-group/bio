@@ -12,10 +12,12 @@
 
 	global.Promise = Base.proto({
 
+		type: 'Promise',
+
 		init: function() {
 			this[state] = States.open;
-			this[onDone] = Pool.Array.get();
-			this[onError] = Pool.Array.get();
+			this[onDone] = [];
+			this[onError] = [];
 			return Base.init.call(this);
 		},
 

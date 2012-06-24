@@ -1,4 +1,6 @@
 var Map = Base.proto({
+
+	type: 'Map',
 	cellSize: 10,
 	columns: 10,
 	rows: 10,

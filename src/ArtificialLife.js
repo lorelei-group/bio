@@ -2,23 +2,48 @@
 
 	global.ArtificialLife = Base.proto({
 
+		type: 'ArtificialLife',
+
 		init: function() {
 			declare();
 
-			this.timer = TimerConfig.proto().init();
+			this._onCellReproduce = this._onCellReproduce.bind(this);
+
+			this.timer = AnimationTimer.proto().init();
 			this.timer.on('tick', this.tick.bind(this));
 
 			this.map = MapConfig.proto().init();
 			this.view = CanvasConfig.proto().init();
 			this.elements = [];
 
+			var cell = Type.proto().init(randomX(), randomY(), 10);
+			cell.shove(random(360), random(50, 30));
+			cell.hash = function() { return 'pepe' };
+			cell.color = 'yellow';
+
 			for (var i = 0, len = 10; i < len; i++)
-				this.elements.push(Animal.proto().init(randomX(), randomY(), 5));
+				this.create(Herbivore);
+
+			for (var i = 0, len = 1; i < len; i++)
+				this.create(Carnivore);
 
 			this._tickElement = this._tickElement.bind(this);
 			this._printElement = this._printElement.bind(this);
 
 			return Base.init.call(this);
+		},
+
+		create: function(Type) {
+			var cell = Type.proto().init(randomX(), randomY(), 10);
+			cell.shove(random(360), random(50, 30));
+			return this.configure(cell);
+		},
+
+		configure: function(cell) {
+			this.map.addElement(cell);
+			cell.once('reproduce', this._onCellReproduce);
+			this.elements.push(cell);
+			return cell;
 		},
 
 		_tickElement: function(element) {
@@ -29,6 +54,11 @@
 			this.view.print(element);
 		},
 
+		_onCellReproduce: function(element, child1, child2) {
+			this.configure(child1);
+			this.configure(child2);
+		},
+
 		tick: function() {
 			this.elements.forEach(this._tickElement);
 
@@ -37,14 +67,14 @@
 		},
 
 		start: function() {
-			this.tick();
-			//this.timer.start();
+			//this.tick();
+			this.timer.start();
 		}
 	});
 
 	var cellSize = 10;
 	var width, height;
-	var TimerConfig, MapConfig, CanvasConfig;
+	var TimerConfig, MapConfig, CanvasConfig, CellConfig;
 
 	function declare() {
 		// VARIABLES
@@ -53,10 +83,6 @@
 
 
 		// CONFIGURATIONS
-		TimerConfig = Timer.proto({
-			interval: 1000 / 5
-		})
-
 		MapConfig = Map.proto({
 			cellSize: cellSize,
 			columns: Math.floor(width / cellSize),

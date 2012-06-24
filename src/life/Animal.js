@@ -1,5 +1,7 @@
 var Animal = LifeForm.proto({
+
 	type: 'Animal',
+	food: [ isPrototype(Animal) ],
 
 	factor: {
 		'visibility': 10,
@@ -10,8 +12,6 @@ var Animal = LifeForm.proto({
 		'interaction brake': 2
 	},
 
-	food: [ isPrototype(Animal) ],
-
 
 	// Abstract
 	canReproduce: function() { },
@@ -20,9 +20,12 @@ var Animal = LifeForm.proto({
 
 
 	tick: function(map) {
-		this.location.x++;
-		this.location.y++;
-		this.interact(map);
+		if (this.canReproduce()) {
+			this.reproduce();
+		} else {
+			this.interact(map);
+		}
+		LifeForm.tick.call(this);
 	},
 
 	hasSamePrototype: function(target) {
@@ -32,8 +35,8 @@ var Animal = LifeForm.proto({
 	interact: function(map) {
 		var neighbors = map.getRangeFromElement(this, this.diameter * this.factor['visibility']).getAll(),
 			// closer food and closer predator
-			food = Pool.Object.get(),
-			predator = Pool.Object.get(),
+			food = {},
+			predator = {},
 			velocity;
 
 		food.target = predator.target = null;
@@ -69,8 +72,6 @@ var Animal = LifeForm.proto({
 			predator.distance = distance;
 			predator.target = target;
 		}
-
-		distance.dispose();
 	},
 
 	isFood: function(target) {
@@ -112,11 +113,11 @@ var Animal = LifeForm.proto({
 		this.emitter.emit('eat', this, target);
 	},
 
-	move: function move() {
+	move: function() {
 		if (this.getVelocity() > this.factor['max velocity'])
 			this.setVelocity(this.factor['max velocity']);
 
-		move.base.call(this);
+		LifeForm.move.call(this);
 	}
 });
 

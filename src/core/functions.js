@@ -30,8 +30,8 @@ function compose() {
 
 function isPrototype(Type, object) {
 	if (arguments.length === 2) {
-		instanceOf.prototype = Type;
-		return object instanceof instanceOf;
+		isPrototype.prototype = Type;
+		return object instanceof isPrototype;
 	}
 
 	var self = function(object) {
