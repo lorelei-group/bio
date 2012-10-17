@@ -21,12 +21,12 @@
 			return Base.init.call(this);
 		},
 
-		then: function(onDone, onError, onProgress) {
-			if (typeof onDone === 'function')
-				this[onDone].push(onDone);
+		then: function(doneCallback, errorCallback) {
+			if (typeof doneCallback === 'function')
+				this[onDone].push(doneCallback);
 
-			if (typeof onError === 'function')
-				this[onError].push(onError);
+			if (typeof errorCallback === 'function')
+				this[onError].push(errorCallback);
 
 			return this;
 		},

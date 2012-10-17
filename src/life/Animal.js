@@ -26,6 +26,8 @@ var Animal = LifeForm.proto({
 			this.interact(map);
 		}
 		LifeForm.tick.call(this);
+		debugger;
+		map.updateLocation(this);
 	},
 
 	hasSamePrototype: function(target) {

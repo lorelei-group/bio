@@ -16,7 +16,7 @@
 			this.view = CanvasConfig.proto().init();
 			this.elements = [];
 
-			var cell = Type.proto().init(randomX(), randomY(), 10);
+			var cell = Herbivore.proto().init(randomX(), randomY(), 10);
 			cell.shove(random(360), random(50, 30));
 			cell.hash = function() { return 'pepe' };
 			cell.color = 'yellow';

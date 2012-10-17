@@ -25,6 +25,12 @@
 			return this;
 		},
 
+		create: function() {
+			var child = this.proto();
+			child.init.apply(child, arguments);
+			return child;
+		}
+
 		hash: function() {
 			var hash = uniqueId++;
 			this.hash = function() { return hash; };

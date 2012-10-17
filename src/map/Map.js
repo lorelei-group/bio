@@ -11,7 +11,7 @@ var Map = Base.proto({
 		this.rows = rows || this.rows;
 
 		this.cells = Grid.proto().init();
-		this.elements = Locator.proto().init();
+		this.elements = Locator.proto(cellSize * columns, cellSize * rows).init();
 		return Base.init.call(this);
 	},
 
